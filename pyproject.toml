@@ -72,6 +72,8 @@ inference-cloud = [
     "openai>=1.30",
     "anthropic>=0.30",
 ]
+# Optional second agent runtime used by the Jarvis MCP sub-agent bridge.
+agents-openai = ["openai-agents>=0.25"]
 inference-google = [
     "google-genai>=1.0",
 ]

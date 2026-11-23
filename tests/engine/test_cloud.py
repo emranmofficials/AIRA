@@ -781,6 +781,22 @@ class TestCloudEngineCanServe:
         assert eng.can_serve("gpt-5.4") is True
         assert eng.can_serve("o3-mini") is True
 
+    def test_custom_base_url_serves_any_model(self, monkeypatch) -> None:
+        """An OpenAI-compatible proxy (OmniRoute) may use arbitrary model names.
+
+        generate()/stream() already fall through to the OpenAI client for
+        unknown names; can_serve() must agree when OPENAI_BASE_URL is set.
+        """
+        monkeypatch.setenv("OPENAI_BASE_URL", "http://127.0.0.1:3141/v1")
+        eng = self._engine(_openai_client=object())
+        assert eng.can_serve("omni/any-model") is True
+        assert eng.can_serve("qwen3.5:0.8b") is True
+        assert eng.can_serve("some-unknown-model") is True
+        # Other provider clients still take precedence for their own models.
+        anthropic = object()
+        eng = self._engine(_openai_client=object(), _anthropic_client=anthropic)
+        assert eng._client_for_model("claude-sonnet-4") is anthropic
+
     def test_unknown_model_not_served_even_with_all_clients(self) -> None:
         """#335: an unrecognized model is declined regardless of how many
         provider clients are configured — it never falls through to OpenAI."""

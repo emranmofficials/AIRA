@@ -215,11 +215,10 @@ def _is_openai_model(model: str) -> bool:
     their OpenAI fall-through so an explicitly-requested unknown cloud model
     still errors loudly at call time.
 
-    Caveat: a user may repoint the OpenAI client at an OpenAI-compatible server
-    (vLLM/LM Studio) via ``OPENAI_BASE_URL`` and legitimately serve non-gpt
-    names. That path is undocumented/untested in this engine; if it is added,
-    this predicate (or ``_client_for_model``) should treat a configured custom
-    base_url as "serves anything".
+    When ``OPENAI_BASE_URL`` points at an OpenAI-compatible proxy (vLLM, LM
+    Studio, OmniRoute, ...) arbitrary model names are legitimate. That case is
+    handled explicitly in ``_client_for_model`` rather than here, so this
+    predicate keeps its narrow meaning for the default api.openai.com client.
     """
     m = model.lower()
     if m in (name.lower() for name in _OPENAI_MODELS):
@@ -2052,6 +2051,14 @@ class CloudEngine(InferenceEngine):
         if _is_google_model(model):
             return self._google_client
         if _is_openai_model(model):
+            return self._openai_client
+        # OPENAI_BASE_URL (read by the openai SDK) can point the client at an
+        # OpenAI-compatible proxy such as OmniRoute. Such a gateway may serve
+        # model names with no provider prefix, so it legitimately "serves
+        # anything". Without this, can_serve() rejects every proxy model that
+        # is not named gpt-*/o*/..., even though generate()/stream() already
+        # fall through to the OpenAI client for unknown names.
+        if self._openai_client is not None and os.environ.get("OPENAI_BASE_URL"):
             return self._openai_client
         return None
 

@@ -1128,6 +1128,54 @@ class ToolsConfig:
     enabled: str = ""  # comma-separated default tools
 
 
+@dataclass(slots=True)
+class HermesAgentConfig:
+    """Settings for the external Hermes Agent runtime adapter."""
+
+    bin: str = ""
+    workspace: str = ""
+    profile: str = ""
+    provider: str = "custom"
+    base_url: str = ""
+    api_key_env: str = "OPENAI_API_KEY"
+    max_turns: int = 0
+    timeout: int = 600
+    yolo: bool = False
+    source: str = "openjarvis"
+    session_id: str = ""
+    system_prompt: str = ""
+    extra_args: List[str] = field(default_factory=list)
+    extra_env: Dict[str, str] = field(default_factory=dict)
+
+
+@dataclass(slots=True)
+class OpenAIAgentConfig:
+    """Settings for the OpenAI Agents SDK sub-agent exposed over MCP."""
+
+    enabled: bool = False
+    name: str = "OpenAI Specialist"
+    instructions: str = (
+        "You are a specialist sub-agent called by the main AIRA assistant. "
+        "Answer the delegated task precisely and concisely."
+    )
+    tool_name: str = "delegate_to_openai_agent"
+    model: str = "gpt-4.1-mini"
+    base_url: str = ""
+    api_key_env: str = "OPENAI_SUBAGENT_API_KEY"
+    api_key: str = ""  # Prefer the environment variable over storing secrets here.
+    max_turns: int = 6
+    timeout: int = 120
+    temperature: float = 0.3
+    tracing: bool = False
+
+
+@dataclass(slots=True)
+class SubagentsConfig:
+    """Optional sub-agent runtimes available to the main agent."""
+
+    openai: OpenAIAgentConfig = field(default_factory=OpenAIAgentConfig)
+
+
 @dataclass
 class AgentConfig:
     """Agent harness settings — orchestration, tools, system prompt."""
@@ -1146,6 +1194,8 @@ class AgentConfig:
         "who or what you are, identify yourself as OpenJarvis. Respond "
         "helpfully, concisely, and accurately."
     )
+    # External runtime settings, kept last to preserve positional construction.
+    hermes: HermesAgentConfig = field(default_factory=HermesAgentConfig)
 
     # Backward-compat property for old field name
     @property
@@ -1781,6 +1831,7 @@ class JarvisConfig:
     hardware: HardwareInfo = field(default_factory=HardwareInfo)
     engine: EngineConfig = field(default_factory=EngineConfig)
     intelligence: IntelligenceConfig = field(default_factory=IntelligenceConfig)
+    subagents: SubagentsConfig = field(default_factory=SubagentsConfig)
     deep_research: DeepResearchConfig = field(default_factory=DeepResearchConfig)
     learning: LearningConfig = field(default_factory=LearningConfig)
     tools: ToolsConfig = field(default_factory=ToolsConfig)
@@ -2111,6 +2162,7 @@ def load_config(path: Optional[Path] = None) -> JarvisConfig:
         top_sections = (
             "engine",
             "intelligence",
+            "subagents",
             "deep_research",
             "learning",
             "agent",

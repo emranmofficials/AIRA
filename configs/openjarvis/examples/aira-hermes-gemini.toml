@@ -1,0 +1,88 @@
+# AIRA — Hermes Agent + Gemini 3.1 Pro via OmniRoute
+# Copy to ~/.openjarvis/config.toml, then set server-side environment variables:
+#
+#   export OPENAI_BASE_URL="https://<omniroute-host>/v1"
+#   export OPENAI_API_KEY="<omniroute-key>"
+#   # Only when the OpenAI Agents SDK sub-agent is enabled:
+#   export OPENAI_SUBAGENT_API_KEY="<openai-or-omniroute-key>"
+#
+# Install the two optional runtimes on the server:
+#   curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+#   pip install 'openjarvis[agents-openai]'
+#
+# Register the OpenAI sub-agent with Hermes once (uses this Python interpreter):
+#   python -c 'from openjarvis.agents.hermes import subagent_mcp_command; print(" ".join(subagent_mcp_command()))'
+#   hermes mcp add openjarvis_subagent --command "$(command -v python)" --args -m openjarvis.subagents.mcp_server
+#   hermes mcp test openjarvis_subagent
+#
+# The Flutter app only needs the OpenJarvis server URL and its own OpenJarvis
+# API key. No model-provider key ever goes into the app.
+
+[engine]
+default = "cloud"
+
+[intelligence]
+default_model = "gemini-3.1-pro-preview"
+
+[server]
+host = "127.0.0.1"
+port = 8000
+agent = "hermes"
+# Leave model empty to use intelligence.default_model.
+model = ""
+# Add the exact origin your Flutter web/desktop build uses.
+cors_origins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://tauri.localhost",
+  "https://tauri.localhost",
+]
+
+[agent]
+default_agent = "hermes"
+max_turns = 10
+context_from_memory = true
+
+[agent.hermes]
+# Empty bin uses `hermes` from PATH.
+bin = ""
+workspace = ""
+profile = ""
+provider = "custom"
+# Empty base_url falls back to OPENAI_BASE_URL or the configured engine endpoint.
+base_url = ""
+api_key_env = "OPENAI_API_KEY"
+max_turns = 8
+timeout = 600
+# Headless chat cannot answer approval prompts, so enable only in a trusted setup.
+yolo = false
+source = "tool"
+# Optional: override Hermes' own tool surface, e.g. ["web", "terminal", "mcp"].
+extra_args = []
+extra_env = {}
+
+[subagents.openai]
+enabled = true
+name = "OpenAI Specialist"
+tool_name = "delegate_to_openai_agent"
+instructions = "You are a specialist sub-agent called by AIRA. Complete the delegated task precisely and return only the useful result."
+model = "gpt-4.1-mini"
+# Empty uses OpenAI directly; set to the OmniRoute URL to route through it.
+base_url = ""
+api_key_env = "OPENAI_SUBAGENT_API_KEY"
+max_turns = 6
+timeout = 120
+temperature = 0.3
+tracing = false
+
+# Features used by the Flutter client (chat, memory, voice, scheduling).
+[memory]
+enabled = true
+
+[scheduler]
+enabled = true
+
+[speech]
+backend = "openai"
+tts_backend = "openai_tts"
+language = "bn"
