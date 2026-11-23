@@ -111,7 +111,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _server,
-                  labelText: 'Server URL',
+                  decoration: const InputDecoration(labelText: 'Server URL'),
                   keyboardType: TextInputType.url,
                   validator: (v) => (v == null || v.trim().isEmpty)
                       ? 'Required'
@@ -120,7 +120,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _key,
-                  labelText: 'API key (optional)',
+                  decoration: const InputDecoration(
+                    labelText: 'API key (optional)',
+                  ),
                   obscureText: true,
                   enableSuggestions: false,
                   autocorrect: false,
@@ -128,7 +130,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _model,
-                  labelText: 'Model (blank = server default)',
+                  decoration: const InputDecoration(
+                    labelText: 'Model (blank = server default)',
+                  ),
                 ),
                 const SizedBox(height: 24),
                 Text(
@@ -143,17 +147,21 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ),
                 TextFormField(
                   controller: _language,
-                  labelText: 'Speech language (e.g. bn, en)',
+                  decoration: const InputDecoration(
+                    labelText: 'Speech language (e.g. bn, en)',
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _voice,
-                  labelText: 'TTS voice id (blank = server default)',
+                  decoration: const InputDecoration(
+                    labelText: 'TTS voice id (blank = server default)',
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _rate,
-                  labelText: 'Speech rate',
+                  decoration: const InputDecoration(labelText: 'Speech rate'),
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 ),
                 const SizedBox(height: 24),

@@ -43,6 +43,8 @@ jobs:
           if [ ! -d android ]; then
             flutter create --project-name aira --org com.openjarvis \
               --platforms=android .
+            # Flutter's default counter test does not belong to this app.
+            rm -f test/widget_test.dart
           fi
 
       - name: Install dependencies

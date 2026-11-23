@@ -39,15 +39,16 @@ class VoiceService {
         throw const VoiceException('Recorder permission was denied');
       }
 
-      String? path;
+      var path = 'aira_voice.m4a'; // ignored on web
       if (!kIsWeb) {
         final dir = await getTemporaryDirectory();
         path = '${dir.path}/aira_voice.m4a';
       }
-      _recordingPath = await _recorder.start(
+      await _recorder.start(
         const RecordConfig(encoder: AudioEncoder.aacLc, autoGain: true),
         path: path,
       );
+      _recordingPath = path;
       _recording = true;
     } on VoiceException {
       rethrow;

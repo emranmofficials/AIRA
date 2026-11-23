@@ -4,7 +4,9 @@ import 'package:aira/core/sse.dart';
 void main() {
   test('emits complete frames across arbitrary chunk boundaries', () {
     final decoder = SseDecoder();
-    expect(decoder.feed('data: {"a":1}\n\ndata: [DO'), isEmpty);
+    final first = decoder.feed('data: {"a":1}\n\ndata: [DO');
+    expect(first, hasLength(1));
+    expect(first.single.data, '{"a":1}');
     final events = decoder.feed('NE]\n\n');
     expect(events, hasLength(2));
     expect(events.first.data, '{"a":1}');

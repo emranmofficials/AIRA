@@ -121,7 +121,9 @@ class ApiClient {
     if (stream == null) throw const ApiException('Empty streaming response');
 
     final decoder = SseDecoder();
-    await for (final text in stream.transform(utf8.decoder)) {
+    // `Utf8Decoder` is a Converter in modern Dart; `bind` keeps multibyte
+    // characters intact across HTTP chunk boundaries.
+    await for (final text in utf8.decoder.bind(stream)) {
       for (final event in decoder.feed(text)) {
         if (event.data == '[DONE]') return;
         final chunk = ChatChunk.fromSse(event);
