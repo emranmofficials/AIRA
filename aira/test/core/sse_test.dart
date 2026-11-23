@@ -8,9 +8,8 @@ void main() {
     expect(first, hasLength(1));
     expect(first.single.data, '{"a":1}');
     final events = decoder.feed('NE]\n\n');
-    expect(events, hasLength(2));
-    expect(events.first.data, '{"a":1}');
-    expect(events.last.data, '[DONE]');
+    expect(events, hasLength(1));
+    expect(events.single.data, '[DONE]');
   });
 
   test('handles CRLF, comments and named events', () {
