@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   apk:
@@ -59,9 +59,15 @@ jobs:
         working-directory: aira
         run: flutter build apk --release
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: aira-release-apk
-          path: aira/build/app/outputs/flutter-apk/app-release.apk
-          if-no-files-found: error
+      - name: Publish APK to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          APK=aira/build/app/outputs/flutter-apk/app-release.apk
+          test -f "$APK"
+          gh release view aira-latest --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
+            gh release create aira-latest --repo "$GITHUB_REPOSITORY" \
+              --title "AIRA latest" --generate-notes
+          gh release upload aira-latest "$APK" --repo "$GITHUB_REPOSITORY" --clobber
+          echo "APK published: https://github.com/$GITHUB_REPOSITORY/releases/tag/aira-latest"
