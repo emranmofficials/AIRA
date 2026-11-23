@@ -47,6 +47,17 @@ jobs:
             rm -f test/widget_test.dart
           fi
 
+      - name: Pin preinstalled Android NDK
+        working-directory: aira
+        run: |
+          # Avoid downloading Flutter's default NDK on every CI run.
+          if [ -f android/local.properties ]; then
+            grep -q '^flutter.ndkVersion=' android/local.properties || \
+              echo 'flutter.ndkVersion=29.0.14206865' >> android/local.properties
+          else
+            echo 'flutter.ndkVersion=29.0.14206865' > android/local.properties
+          fi
+
       - name: Install dependencies
         working-directory: aira
         run: flutter pub get
